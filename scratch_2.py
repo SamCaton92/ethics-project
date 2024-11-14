@@ -99,22 +99,27 @@ class AnimalLookupApp:
         # Filter input fields
         tk.Label(filters_frame, text="Year Start:").grid(row=0, column=0, sticky="e")
         self.year_start_entry = tk.Entry(filters_frame, width=20)
+        self.year_start_entry.insert(0,"2000")
         self.year_start_entry.grid(row=0, column=1, padx=5)
 
         tk.Label(filters_frame, text="Year End:").grid(row=1, column=0, sticky="e")
         self.year_end_entry = tk.Entry(filters_frame, width=20)
+        self.year_end_entry.insert(0, "2024")
         self.year_end_entry.grid(row=1, column=1, padx=5)
 
         tk.Label(filters_frame, text="Longitude:").grid(row=2, column=0, sticky="e")
         self.longitude_entry = tk.Entry(filters_frame, width=20)
+        self.longitude_entry.insert(0, "153.0260")
         self.longitude_entry.grid(row=2, column=1, padx=5)
 
         tk.Label(filters_frame, text="Latitude:").grid(row=3, column=0, sticky="e")
         self.latitude_entry = tk.Entry(filters_frame, width=20)
+        self.latitude_entry.insert(0, "-27.4705")
         self.latitude_entry.grid(row=3, column=1, padx=5)
 
         tk.Label(filters_frame, text="Radius (meters):").grid(row=4, column=0, sticky="e")
         self.radius_entry = tk.Entry(filters_frame, width=20)
+        self.radius_entry.insert(0, "100")
         self.radius_entry.grid(row=4, column=1, padx=5)
 
         # Search button to fetch animal data
