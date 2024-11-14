@@ -8,7 +8,7 @@ import ssl
 import certifi
 import webbrowser
 import sys
-
+import tkintermapview
 
 class AnimalLookupApp:
     def __init__(self, root):
@@ -26,6 +26,7 @@ class AnimalLookupApp:
 
         # Set up the user interface
         self.setup_ui()
+        
 
     def initialize_geolocator(self):
         """Initialize the geolocator with SSL verification using OpenStreetMap's Nominatim service."""
@@ -63,6 +64,16 @@ class AnimalLookupApp:
 
         results_frame = tk.LabelFrame(self.root, text="Animal Names")
         results_frame.grid(row=2, column=0, padx=10, pady=10, sticky="nsew")
+
+        mapview_frame = tk.LabelFrame(self.root, text="Map View")
+        mapview_frame.grid(row=0, column=1, rowspan=3)
+
+        # Map View
+        self.mapview = tkintermapview.TkinterMapView(mapview_frame, width=425, height=500)
+        self.mapview.pack()
+       
+        self.mapview.set_position(-27.4705, 153.0260) # Brisbane
+        self.mapview.set_zoom(10)
 
         # Address input fields
         tk.Label(address_frame, text="Street Address:").grid(row=0, column=0, sticky="e")
@@ -141,7 +152,18 @@ class AnimalLookupApp:
                 self.latitude_entry.delete(0, tk.END)
                 self.longitude_entry.insert(tk.END, location.longitude)
                 self.latitude_entry.insert(tk.END, location.latitude)
+                # Update Map View
+                try: 
+                    self.marker.delete()
+                    print("Previous marker removed")
+                except:
+                    print("No marker to delete")          
+                self.marker = self.mapview.set_position(location.latitude, location.longitude, marker=True)
+                self.mapview.set_zoom(15)
+
+                # Success popup
                 messagebox.showinfo("Success", f"Address found: ({location.latitude}, {location.longitude})")
+                
             else:
                 messagebox.showerror("Error", "Address not found.")
         except Exception as e:
