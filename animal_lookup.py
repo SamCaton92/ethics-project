@@ -136,6 +136,9 @@ class AnimalLookupApp:
         # Double-click event to open animal URL
         self.animal_listbox.bind('<Double-1>', self.on_animal_select)
 
+        # Single-click event to update animals on map
+        self.animal_listbox.bind('<<ListboxSelect>>', self.on_animal_initial_select)
+
         # Configure Listbox expansion within frame
         results_frame.grid_rowconfigure(0, weight=1)
         results_frame.grid_columnconfigure(0, weight=1)
@@ -159,8 +162,8 @@ class AnimalLookupApp:
                 self.latitude_entry.insert(tk.END, location.latitude)
                 # Update Map View
                 try: 
-                    self.marker.delete()
-                    print("Previous marker removed")
+                    self.mapview.delete_all_marker()
+                    print("Previous markers removed")
                 except:
                     print("No marker to delete")          
                 self.marker = self.mapview.set_position(location.latitude, location.longitude, marker=True)
@@ -190,8 +193,14 @@ class AnimalLookupApp:
 
             # Fetch data using galah
             atlas_output = galah.atlas_species(filters=filters, bbox=bbox)
-            print("Atlas output preview:", atlas_output.head())  # For debugging
+            self.atlas_occurrence_coords = galah.atlas_occurrences(
+                filters=filters,
+                bbox=bbox
+                #fields=["VernacularName", "decimalLatitude", "decimalLongitude"]
+            )
 
+            print("Atlas output preview:", atlas_output.head())  # For debugging
+            
             # Columns expected in the data
             display_name_column = "Vernacular Name"  # Name to display in Listbox
             url_column = "Species"  # Column with URLs for animal details
@@ -235,6 +244,35 @@ class AnimalLookupApp:
                 webbrowser.open(url)
             else:
                 messagebox.showinfo("No URL", "No URL available for this animal.")
+
+    def on_animal_initial_select(self, event):
+        selection = event.widget.curselection()
+        if selection:
+            index = selection[0]
+            animal_name = event.widget.get(index)
+            sci_name_df = galah.search_taxa(animal_name)
+            sci_name = sci_name_df["scientificName"].to_string(index=False)
+            
+            coords_df = self.atlas_occurrence_coords.query(f'scientificName == "{sci_name}"')
+            
+            specific_coords_df = coords_df[['decimalLatitude', 'decimalLongitude']]
+            #Clear prior markers
+            try: 
+                self.mapview.delete_all_marker()
+                print("Previous markers removed")
+            except:
+                print("No marker to delete")
+            i = 0
+            while i < len(specific_coords_df):
+                row = specific_coords_df.iloc[i]
+                latitude = row["decimalLatitude"]#.to_string(index=False)
+                longitude = row["decimalLongitude"]#.to_string(index=False)
+                self.marker = self.mapview.set_marker(latitude, longitude, text=animal_name)
+                self.mapview.set_zoom(16)
+                i += 1
+                
+            #new_df = self.atlas_occurrence_coords.loc[self.atlas_occurrence_coords['VernacularName'] == animal_name]
+            #print(self.atlas_occurrence_coords.columns)
 
 
 if __name__ == "__main__":

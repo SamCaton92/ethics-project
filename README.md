@@ -5,4 +5,4 @@ install packages by running the command:
 > pip install galah-python geopy tkintermapview
 
 Run program by running the following command in ethics-project folder:
-> python scratch2.py
+> python animal_lookup.py
